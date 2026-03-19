@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgriCast — Market Price Forecasting</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- Background layers -->
+  <div class="bg-grain"></div>
+  <div class="bg-mesh"></div>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">🌾</span>
+        <span class="logo-text">AgriCast</span>
+      </div>
+      <nav class="header-nav">
+        <a href="#forecast" class="nav-link">Forecast</a>
+        <a href="#trends" class="nav-link">Trends</a>
+        <span class="nav-badge">Live Data</span>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <p class="hero-tag">AI-Powered Agricultural Intelligence</p>
+      <h1 class="hero-title">Know When to Sell.<br><em>Maximize Your Harvest.</em></h1>
+      <p class="hero-sub">Our machine learning model analyzes market patterns across East Africa to predict commodity prices — helping you make smarter selling decisions.</p>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num">4</span><span class="stat-label">Crops</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">5</span><span class="stat-label">Markets</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">ML</span><span class="stat-label">Powered</span></div>
+      </div>
+    </div>
+    <div class="hero-illustration">
+      <div class="field-icon">🌽</div>
+      <div class="field-icon">☕</div>
+      <div class="field-icon">🍃</div>
+      <div class="field-icon">🫘</div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-wrapper">
+
+    <!-- FORECAST FORM -->
+    <section id="forecast" class="section">
+      <div class="section-label">Step 1</div>
+      <h2 class="section-title">Enter Crop Details</h2>
+
+      <div class="form-card">
+        <div class="form-grid">
+
+          <div class="field-group">
+            <label class="field-label">🌾 Commodity</label>
+            <select id="commodity" class="field-input">
+            {% for c in commodities %}
+            <option value="{{c}}">{{c}}</option>
+            {% endfor %}
+            </select>
+          </div>
+  <div class="field-group">
+            <label class="field-label">📍 State / Region</label>
+            <select id="state" class="field-input">
+            {% for s in states %}
+            <option value="{{s}}">{{s}}</option>
+            {% endfor %}
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">District Name</label>
+            <select id="district" class="field-input">
+            {% for d in district %}
+            <option value="{{d}}">{{d}}</option>
+            {% endfor %}
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">🏪 Market Name</label>
+            <select id="market" class="field-input">
+            {% for m in markets %}
+            <option value="{{m}}">{{m}}</option>
+            {% endfor %}
+            </select>
+          </div>
+
+        
+
+          <div class="field-group">
+            <label class="field-label">🌿 Variety</label>
+            <select id="variety" class="field-input">
+            {% for v in varieties %}
+            <option value="{{v}}">{{v}}</option>
+            {% endfor %}
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">🏅 Grade</label>
+            <select id="grade" class="field-input">
+            {% for g in grades %}
+            <option value="{{g}}">{{g}}</option>
+            {% endfor %}
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">💵 Min Price (Rs./Quintal)</label>
+            <input type="number" id="min_price" class="field-input" value="40" min="1" step="0.5" />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">💰 Max Price (Rs./Quintal)</label>
+            <input type="number" id="max_price" class="field-input" value="55" min="1" step="0.5" />
+          </div>
+
+        </div>
+
+        <div class="form-footer">
+          <button id="predict-btn" class="predict-btn" onclick="runPrediction()">
+            <span class="btn-text">Predict Price</span>
+            <span class="btn-icon">→</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTS (hidden until prediction) -->
+    <section id="results" class="section hidden">
+      <div class="section-label">Step 2</div>
+      <h2 class="section-title">Forecast Results</h2>
+
+      <div class="results-grid">
+        <div class="result-card result-current">
+          <div class="result-card-label">Current Market Price</div>
+          <div class="result-card-value" id="current-price">—</div>
+          <div class="result-card-unit">Rs./Quintal</div>
+        </div>
+
+        <div class="result-card result-predicted">
+          <div class="result-card-label">Predicted Future Price</div>
+          <div class="result-card-value" id="predicted-price">—</div>
+          <div class="result-card-unit">Rs./Quintal</div>
+        </div>
+
+        <div class="result-card result-recommendation" id="recommendation-card">
+          <div class="result-card-label">Recommendation</div>
+          <div class="recommendation-icon" id="rec-icon">📊</div>
+          <div class="recommendation-text" id="recommendation-text">—</div>
+          <div class="pct-change" id="pct-change"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHART -->
+    <section id="trends" class="section hidden" id="chart-section">
+      <div class="section-label">Step 3</div>
+      <h2 class="section-title">12-Month Price Trend</h2>
+      <div class="chart-card">
+        <div class="chart-header">
+          <span class="chart-commodity" id="chart-title">Commodity</span>
+          <span class="chart-subtitle">Historical monthly prices (Rs./Quintal)</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="priceChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <p>AgriCast &copy; 2024 · AI-powered price forecasting for East African farmers</p>
+  </footer>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
